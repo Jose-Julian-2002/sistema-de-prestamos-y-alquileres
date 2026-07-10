@@ -52,6 +52,7 @@ namespace FinanzasManager.Domain.Entities
                     saldo -= tx.Monto;
             }
             return saldo;
+
         }
     }
 }
