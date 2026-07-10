@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FinanzasManager.Domain.Entities
+namespace FinanzasManager.Domain.Enums;
+
+public enum TipoTransaccion
 {
-    public enum TipoTransaccion
-    {
-        Desembolso = 1,
-        CargoInteres = 2,
-        PagoInteres = 3,
-        PagoCapital = 4,
-    }
+    Desembolso = 1,
+    CargoInteres = 2,
+    PagoInteres = 3,
+    PagoCapital = 4,
 }
