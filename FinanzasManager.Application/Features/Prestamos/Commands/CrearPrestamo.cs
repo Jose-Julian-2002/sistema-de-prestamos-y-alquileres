@@ -1,21 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+
 using MediatR;
-using FinanzasManager.Domain.Entities;
 using FinanzasManager.Application.Common.Interfaces;
+using FinanzasManager.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanzasManager.Application.Features.Prestamos.Commands
 {
     public record CrearPrestamoCommand(
-    Guid ClienteId,
-    decimal MontoCapital,
-    decimal PorcentajeInteres
-) : IRequest<Guid>;
+        int ClienteId,
+        decimal MontoCapital,
+        decimal Interes,
+        decimal TotalCuotas
+    ) : IRequest<int>;
 
-    public class CrearPrestamoCommandHandler : IRequestHandler<CrearPrestamoCommand, Guid>
+    public class CrearPrestamoCommandHandler : IRequestHandler<CrearPrestamoCommand, int>
     {
         // Inyectamos la interfaz que creamos en el paso anterior
         private readonly IApplicationDbContext _context;
@@ -25,22 +25,40 @@ namespace FinanzasManager.Application.Features.Prestamos.Commands
             _context = context;
         }
 
-        public async Task<Guid> Handle(CrearPrestamoCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CrearPrestamoCommand request, CancellationToken cancellationToken)
         {
-            // 1. Creamos la entidad (Aquí adentro ya se genera la primera transacción de "Desembolso")
+            if (request.MontoCapital <= 0)
+                throw new ArgumentException("El monto de capital debe ser mayor que cero.");
+
+            if (request.Interes < 0)
+                throw new ArgumentException("El interes no puede ser negativo.");
+
+            if (request.TotalCuotas <= 0)
+                throw new ArgumentException("El total de la cuota debe ser mayor que cero.");
+
+            // 1. El prestamo siempre pertenece a un cliente existente.
+            var cliente = await _context.Clientes
+                .FirstOrDefaultAsync(c => c.Id == request.ClienteId, cancellationToken);
+
+            if (cliente is null)
+                throw new ArgumentException($"No existe un cliente con el Id {request.ClienteId}.");
+
+            // 2. Creamos la entidad
             var nuevoPrestamo = new Prestamo(
                 request.ClienteId,
                 request.MontoCapital,
-                request.PorcentajeInteres
+                request.Interes,
+                request.TotalCuotas,
+                DateTime.Now
             );
 
-            // 2. Lo agregamos al DbSet a través de la interfaz
+            // 3. Lo agregamos al DbSet a traves de la interfaz
             _context.Prestamos.Add(nuevoPrestamo);
 
-            // 3. Guardamos los cambios de forma asíncrona en la Base de Datos
+            // 4. Guardamos los cambios de forma asíncrona en la Base de Datos
             await _context.SaveChangesAsync(cancellationToken);
 
-            // 4. Retornamos el ID
+            // 5. Retornamos el ID
             return nuevoPrestamo.Id;
         }
     }

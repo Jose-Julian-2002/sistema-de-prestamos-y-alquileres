@@ -1,58 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FinanzasManager.Domain.Enums;
+
 namespace FinanzasManager.Domain.Entities
 {
     public class Prestamo
     {
-        public Guid Id { get; set; }
-        public Guid ClienteId { get; set; }
+        public int Id { get; set; }
+        public decimal MontoCapital { get; set; }
+
+        // Porcentaje de interes aplicado al capital
+        public decimal Interes { get; set; }
+
+        // Importe de cada cuota, no la cantidad de cuotas
+        public decimal TotalCuotas { get; set; }
+
+        public DateTime FechaInicio { get; set; }
+        public bool Estado { get; set; } = true;
+        public int ClienteId { get; set; }
+
         public Cliente Cliente { get; set; } = null!;
-        public decimal MontoCapitalInicial { get; set; }
-        public decimal PorcentajeInteres { get; set; } 
-        public DateTime FechaDesembolso { get; set; }
-        public bool Activo { get; set; }
+        public ICollection<PagoDetalle> PagoDetalles { get; set; } = new List<PagoDetalle>();
 
-        // Lista de movimientos
-        public List<TransaccionPrestamo> Transacciones { get; private set; } = new();
+        // Constructor para Entity Framework
+        private Prestamo() { }
 
-        public Prestamo(Guid clienteId, decimal montoCapitalInicial, decimal porcentajeInteres)
+        public Prestamo(int clienteId, decimal montoCapital, decimal interes, decimal totalCuotas, DateTime fechaInicio)
         {
-            Id = Guid.NewGuid();
             ClienteId = clienteId;
-            MontoCapitalInicial = montoCapitalInicial;
-            PorcentajeInteres = porcentajeInteres;
-            FechaDesembolso = DateTime.Now;
-            Activo = true;
-
-            // Regla de Negocio Al crear un préstamo, automáticamente se genera la transacción de desembolso
-            Transacciones.Add(new TransaccionPrestamo(montoCapitalInicial, TipoTransaccion.Desembolso, "Desembolso inicial del préstamo"));
-        }
-
-        //registrar pagos
-        public void RegistrarPago(decimal monto, TipoTransaccion tipo, string nota)
-        {
-            if (monto <= 0) throw new ArgumentException("El monto debe ser mayor a cero.");
-
-            Transacciones.Add(new TransaccionPrestamo(monto, tipo, nota));
-        }
-
-        //cálculo dinámico que garantiza que todo cuadre
-        public decimal CalcularSaldoActual()
-        {
-            decimal saldo = 0;
-            foreach (var tx in Transacciones)
-            {
-                if (tx.Tipo == TipoTransaccion.Desembolso || tx.Tipo == TipoTransaccion.CargoInteres)
-                    saldo += tx.Monto;
-                else if (tx.Tipo == TipoTransaccion.PagoInteres || tx.Tipo == TipoTransaccion.PagoCapital)
-                    saldo -= tx.Monto;
-            }
-            return saldo;
-
+            MontoCapital = montoCapital;
+            Interes = interes;
+            TotalCuotas = totalCuotas;
+            FechaInicio = fechaInicio;
+            Estado = true;
         }
     }
 }

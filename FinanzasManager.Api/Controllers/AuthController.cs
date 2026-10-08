@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using FinanzasManager.Application.Features.Autenticacion.Commands;
 
 namespace FinanzasManager.Api.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -16,19 +18,21 @@ namespace FinanzasManager.Api.Controllers
             _mediator = mediator;
         }
 
+        // Registro abierto: cualquier persona puede crear una cuenta (rol Cobrador por defecto)
+        [AllowAnonymous]
+        [HttpPost("registrar")]
+        public async Task<IActionResult> Registrar([FromBody] RegistrarUsuarioCommand comando)
+        {
+            var usuarioId = await _mediator.Send(comando);
+            return StatusCode(StatusCodes.Status201Created, new { id = usuarioId });
+        }
+
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] IniciarSesionCommand comando)
         {
-            try
-            {
-                var resultado = await _mediator.Send(comando);
-                return Ok(resultado);
-            }
-            catch (Exception ex)
-            {
-                // Si las credenciales fallan, devolvemos un 401 Unauthorized de forma limpia
-                return Unauthorized(new { mensaje = ex.Message });
-            }
+            var resultado = await _mediator.Send(comando);
+            return Ok(resultado);
         }
     }
 }

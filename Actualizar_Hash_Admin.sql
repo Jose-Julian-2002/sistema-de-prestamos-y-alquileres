@@ -1,0 +1,21 @@
+-- ============================================================================
+-- ESTE ARCHIVO ESTA OBSOLETO. NO LO EJECUTES.
+--
+-- Escrito para el esquema anterior a la migracion de Roles y Permisos.
+-- Entonces existia la tabla `Usuarios` con columnas `Email`, `PasswordHash`,
+-- `Rol` y `Activo`. Nada de eso coincide hoy con el esquema real de FinanzasDB,
+-- asi que el UPDATE de abajo daria error.
+--
+-- ESQUEMA ACTUAL DE LA TABLA Usuario:
+--     Id, Nombre, Gmail, Password, Estado, RolId
+--
+-- El administrador inicial ya no se crea por SQL. Lo crea el seed al arrancar
+-- la API (FinanzasManager.Infrastructure/Persistence/DbInitializer.cs), que
+-- genera el hash BCrypt en el servidor. Solo se crea si la tabla esta vacia.
+--
+-- Credenciales iniciales: admin@finanzas.com / admin123
+--
+-- Para cambiar la contrasena una vez dentro, usa la API:
+--     PUT /api/Usuarios/1/password
+--     { "passwordActual": "admin123", "passwordNueva": "TuContrasenaFuerte" }
+-- ============================================================================

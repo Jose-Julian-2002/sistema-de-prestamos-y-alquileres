@@ -1,49 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using MediatR;
-using FinanzasManager.Domain.Entities;
 using FinanzasManager.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace FinanzasManager.Application.Features.Autenticacion.Commands
 {
-    public record IniciarSesionCommand(string Email, string Password): IRequest<AuthResponseDto>;
-    public record AuthResponseDto(string Token, string Nombre, string Rol);
+    public record IniciarSesionCommand(string Gmail, string Password) : IRequest<AuthResponseDto>;
+
+    public record AuthResponseDto(string Token, string Nombre, string Rol, IReadOnlyList<string> Permisos);
+
     public class IniciarSesionCommandHandler : IRequestHandler<IniciarSesionCommand, AuthResponseDto>
     {
         private readonly IApplicationDbContext _context;
-        // NOTA: Para producción usaremos hashing (como BCrypt), por ahora validamos texto plano
-        // ya que el admin de prueba lo insertamos como 'admin123'
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
-        public IniciarSesionCommandHandler(IApplicationDbContext context)
+        public IniciarSesionCommandHandler(
+            IApplicationDbContext context,
+            IPasswordHasher passwordHasher,
+            IJwtTokenGenerator jwtTokenGenerator)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
         public async Task<AuthResponseDto> Handle(IniciarSesionCommand request, CancellationToken cancellationToken)
         {
-            // 1. Buscar al usuario por Email
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == request.Email && u.Activo, cancellationToken);
+            var gmailNormalizado = (request.Gmail ?? string.Empty).ToLower().Trim();
 
-            // 2. Si no existe o la contraseña no coincide (Control de errores básico de seguridad)
-            if (usuario == null || usuario.PasswordHash != request.Password)
+            // 1. Buscar al usuario activo y traerse su rol con los permisos en la misma consulta,
+            //    para no disparar una segunda vuelta a la base al montar el token.
+            var usuario = await _context.Usuarios
+                .Include(u => u.Rol)
+                .ThenInclude(r => r.Permisos)
+                .ThenInclude(rp => rp.Permiso)
+                .FirstOrDefaultAsync(u => u.Gmail == gmailNormalizado && u.Estado, cancellationToken);
+
+            // 2. Verificar la contrasena contra el hash BCrypt almacenado.
+            //    Si el hash esta malformado, Verify devuelve false sin lanzar excepcion.
+            if (usuario is null || !_passwordHasher.Verify(request.Password ?? string.Empty, usuario.Password))
             {
-                throw new Exception("Credenciales incorrectas o usuario inactivo.");
+                throw new UnauthorizedAccessException("Credenciales incorrectas o usuario inactivo.");
             }
 
-            // 3. Generar el Token JWT (En el paso siguiente crearemos el helper, por ahora simulamos la firma)
-            // Para mantener el handler limpio, la lógica del token la inyectaremos o la procesamos aquí:
-            string tokenGenerado = "TOKEN_JWT_TEMPORAL_PROVISORIO";
+            var permisos = usuario.Rol.Permisos
+                .Select(rp => rp.Permiso.Nombre)
+                .OrderBy(nombre => nombre)
+                .ToList();
 
-            // TODO: Reemplazar por tu generador de JWT real (lo configuramos abajo)
+            // 3. Generar el token con los claims del usuario y sus permisos.
+            var token = _jwtTokenGenerator.GenerarToken(usuario.Id, usuario.Nombre, usuario.Rol.Nombre, permisos);
 
-            return new AuthResponseDto(tokenGenerado, usuario.Nombre, usuario.Rol);
+            return new AuthResponseDto(token, usuario.Nombre, usuario.Rol.Nombre, permisos);
         }
     }
 }
