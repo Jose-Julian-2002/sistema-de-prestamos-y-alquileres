@@ -134,6 +134,9 @@ namespace FinanzasManager.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
@@ -147,6 +150,8 @@ namespace FinanzasManager.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
 
                     b.HasIndex("MetodoPagoId");
 
@@ -415,6 +420,12 @@ namespace FinanzasManager.Infrastructure.Migrations
 
             modelBuilder.Entity("FinanzasManager.Domain.Entities.Pago", b =>
                 {
+                    b.HasOne("FinanzasManager.Domain.Entities.Cliente", "Cliente")
+                        .WithMany("Pagos")
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("FinanzasManager.Domain.Entities.MetodoPago", "MetodoPago")
                         .WithMany("Pagos")
                         .HasForeignKey("MetodoPagoId")
@@ -426,6 +437,8 @@ namespace FinanzasManager.Infrastructure.Migrations
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Cliente");
 
                     b.Navigation("MetodoPago");
 
@@ -512,6 +525,8 @@ namespace FinanzasManager.Infrastructure.Migrations
             modelBuilder.Entity("FinanzasManager.Domain.Entities.Cliente", b =>
                 {
                     b.Navigation("Contratos");
+
+                    b.Navigation("Pagos");
 
                     b.Navigation("Prestamos");
                 });

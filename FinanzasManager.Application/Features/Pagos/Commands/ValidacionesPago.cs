@@ -10,9 +10,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinanzasManager.Application.Features.Pagos.Commands
 {
+    // Una aplicacion de pago: monto que se abona a un prestamo o a un contrato.
+    // La FechaPago del detalle NO se recibe: el servidor la copia de la fecha del
+    // recibo (cabecera) para que nada dependa del reloj del cliente.
     public record DetallePagoRequest(
         decimal MontoAplicado,
-        DateTime? FechaPago,
         int? PrestamoId,
         int? ContratoId);
 

@@ -46,6 +46,8 @@ namespace FinanzasManager.Api.Controllers
         }
 
         // POST api/Pagos
+        // El recibo pertenece al cliente (ClienteId) y puede repartirse en varios
+        // destinos (detalles). La fecha y el usuario (cajero) los pone el servidor.
         [Authorize(Policy = Permisos.Pagos.Crear)]
         [HttpPost]
         public async Task<IActionResult> Crear([FromBody] CrearPagoRequest cuerpo)
@@ -54,7 +56,7 @@ namespace FinanzasManager.Api.Controllers
                 return Unauthorized("No se pudo identificar al usuario del token.");
 
             var pagoId = await _mediator.Send(new CrearPagoCommand(
-                cuerpo.Fecha,
+                cuerpo.ClienteId,
                 cuerpo.MetodoPagoId,
                 SolicitanteId.Value,
                 cuerpo.Detalles));
@@ -73,9 +75,10 @@ namespace FinanzasManager.Api.Controllers
         }
     }
 
-    // Cuerpo separado del command: UsuarioId lo pone el servidor desde el token.
+    // Cuerpo separado del command: ni la fecha ni el UsuarioId vienen del cliente.
+    // La fecha la pone el servidor y UsuarioId (cajero) sale del token.
     public record CrearPagoRequest(
-        DateTime Fecha,
+        int ClienteId,
         int MetodoPagoId,
         IReadOnlyList<DetallePagoRequest> Detalles);
 }

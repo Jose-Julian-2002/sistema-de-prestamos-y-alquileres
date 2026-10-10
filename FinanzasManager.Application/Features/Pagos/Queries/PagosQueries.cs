@@ -16,6 +16,8 @@ namespace FinanzasManager.Application.Features.Pagos.Queries
         int Id,
         DateTime Fecha,
         decimal MontoTotal,
+        int ClienteId,
+        string Cliente,
         int MetodoPagoId,
         string MetodoPago,
         int UsuarioId,
@@ -61,16 +63,10 @@ namespace FinanzasManager.Application.Features.Pagos.Queries
             if (request.MetodoPagoId.HasValue)
                 query = query.Where(p => p.MetodoPagoId == request.MetodoPagoId.Value);
 
-            // Filtro por cliente: el recibo aparece si alguna de sus aplicaciones
-            // toca un prestamo o contrato de ese cliente.
+            // La cabecera ahora "pertenece" al cliente (ClienteId directo): filtrar
+            // por cliente ya no obliga a recorrer los detalles.
             if (request.ClienteId.HasValue)
-            {
-                var clienteId = request.ClienteId.Value;
-                query = query.Where(p =>
-                    p.Detalles.Any(d =>
-                        (d.PrestamoId != null && d.Prestamo!.ClienteId == clienteId)
-                        || (d.ContratoId != null && d.Contrato!.ClienteId == clienteId)));
-            }
+                query = query.Where(p => p.ClienteId == request.ClienteId.Value);
 
             var total = await query.CountAsync(cancellationToken);
 
@@ -78,9 +74,9 @@ namespace FinanzasManager.Application.Features.Pagos.Queries
                 .OrderByDescending(p => p.Fecha)
                 .Skip((pagina - 1) * tamano)
                 .Take(tamano)
+                .Include(p => p.Cliente)
                 .Include(p => p.MetodoPago)
                 .Include(p => p.Usuario)
-                .Include(p => p.Detalles)
                 .ToListAsync(cancellationToken);
 
             var items = pagos.Select(CrearDto).ToList();
@@ -94,6 +90,8 @@ namespace FinanzasManager.Application.Features.Pagos.Queries
                 pago.Id,
                 pago.Fecha,
                 pago.MontoTotal,
+                pago.ClienteId,
+                pago.Cliente.Nombre,
                 pago.MetodoPagoId,
                 pago.MetodoPago.Nombre,
                 pago.UsuarioId,
@@ -116,6 +114,7 @@ namespace FinanzasManager.Application.Features.Pagos.Queries
         public async Task<DetallePagoDto> Handle(ObtenerPagoQuery request, CancellationToken cancellationToken)
         {
             var pago = await _context.Pagos.AsNoTracking()
+                .Include(p => p.Cliente)
                 .Include(p => p.MetodoPago)
                 .Include(p => p.Usuario)
                 .Include(p => p.Detalles)
@@ -136,7 +135,7 @@ namespace FinanzasManager.Application.Features.Pagos.Queries
                     string? referencia = null;
 
                     if (d.Prestamo is not null)
-                        referencia = $"Prestamo #{d.PrestamoId} - {d.Prestamo.Cliente.Nombre}";
+                        referencia = $"Prestamo #{d.PrestamoId}";
 
                     if (d.Contrato is not null)
                         referencia = $"Contrato #{d.ContratoId} - {d.Contrato.Propiedad.Nombre}";

@@ -10,18 +10,21 @@ namespace FinanzasManager.Domain.Entities
         public decimal MontoTotal { get; set; }
         public int MetodoPagoId { get; set; }
         public int UsuarioId { get; set; }
+        public int ClienteId { get; set; }
 
         public MetodoPago MetodoPago { get; set; } = null!;
         public Usuario Usuario { get; set; } = null!;
+        public Cliente Cliente { get; set; } = null!;
         public ICollection<PagoDetalle> Detalles { get; set; } = new List<PagoDetalle>();
 
         // Constructor para Entity Framework
         private Pago() { }
 
-        public Pago(int metodoPagoId, int usuarioId, DateTime fecha, decimal montoTotal)
+        public Pago(int metodoPagoId, int usuarioId, int clienteId, DateTime fecha, decimal montoTotal)
         {
             MetodoPagoId = metodoPagoId;
             UsuarioId = usuarioId;
+            ClienteId = clienteId;
             Fecha = fecha;
             MontoTotal = montoTotal;
         }

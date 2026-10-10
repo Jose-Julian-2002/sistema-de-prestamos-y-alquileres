@@ -25,6 +25,11 @@ namespace FinanzasManager.Infrastructure.Persistence
         public DbSet<Pago> Pagos => Set<Pago>();
         public DbSet<PagoDetalle> PagoDetalles => Set<PagoDetalle>();
 
+        // Transaccion explicita para el alta de recibos: la hereda de DbContext pero
+        // se declara aqui para satisfacer IApplicationDbContext con nombre completo.
+        public async Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+            => await Database.BeginTransactionAsync(cancellationToken);
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -201,6 +206,11 @@ namespace FinanzasManager.Infrastructure.Persistence
                 entity.HasOne(p => p.Usuario)
                       .WithMany(u => u.Pagos)
                       .HasForeignKey(p => p.UsuarioId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.Cliente)
+                      .WithMany(c => c.Pagos)
+                      .HasForeignKey(p => p.ClienteId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 

@@ -17,6 +17,7 @@ namespace FinanzasManager.Domain.Entities
 
         public ICollection<Prestamo> Prestamos { get; set; } = new List<Prestamo>();
         public ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
+        public ICollection<Pago> Pagos { get; set; } = new List<Pago>();
 
         // Constructor para Entity Framework
         private Cliente() { }
