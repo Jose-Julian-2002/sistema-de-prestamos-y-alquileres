@@ -48,5 +48,25 @@ namespace FinanzasManager.Domain.Entities
             FechaFin = fechaFin;
             Estado = true;
         }
+
+        // El cobrador que registro el contrato no cambia al editarlo, por eso
+        // UsuarioId no forma parte de los datos editables.
+        public void Actualizar(
+            int propiedadId,
+            int clienteId,
+            decimal montoAlquiler,
+            decimal montoGarantia,
+            DateTime diaPago,
+            DateTime fechaInicio,
+            DateTime fechaFin)
+        {
+            PropiedadId = propiedadId;
+            ClienteId = clienteId;
+            MontoAlquiler = montoAlquiler;
+            MontoGarantia = montoGarantia;
+            DiaPago = diaPago;
+            FechaInicio = fechaInicio;
+            FechaFin = fechaFin;
+        }
     }
 }

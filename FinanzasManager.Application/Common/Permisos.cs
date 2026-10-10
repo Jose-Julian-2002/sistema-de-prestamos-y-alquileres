@@ -29,6 +29,7 @@ namespace FinanzasManager.Application.Common
             public const string Crear = "Prestamos.Crear";
             public const string Editar = "Prestamos.Editar";
             public const string Abonos = "Prestamos.Abonos";
+            public const string Eliminar = "Prestamos.Eliminar";
         }
 
         public static class Contratos
@@ -36,6 +37,7 @@ namespace FinanzasManager.Application.Common
             public const string Ver = "Contratos.Ver";
             public const string Crear = "Contratos.Crear";
             public const string Editar = "Contratos.Editar";
+            public const string Eliminar = "Contratos.Eliminar";
         }
 
         public static class Propiedades
@@ -60,6 +62,16 @@ namespace FinanzasManager.Application.Common
         {
             public const string Ver = "Pagos.Ver";
             public const string Crear = "Pagos.Crear";
+            public const string Eliminar = "Pagos.Eliminar";
+        }
+
+        // Catalogo de metodos de pago (efectivo, transferencia...). Plural, igual que el resto.
+        public static class MetodosPago
+        {
+            public const string Ver = "MetodosPago.Ver";
+            public const string Crear = "MetodosPago.Crear";
+            public const string Editar = "MetodosPago.Editar";
+            public const string Eliminar = "MetodosPago.Eliminar";
         }
 
         public static class Usuarios
@@ -86,11 +98,12 @@ namespace FinanzasManager.Application.Common
         public static readonly IReadOnlyList<string> Todos = new List<string>
         {
             Clientes.Ver, Clientes.Crear, Clientes.Editar, Clientes.Eliminar,
-            Prestamos.Ver, Prestamos.Crear, Prestamos.Editar, Prestamos.Abonos,
-            Contratos.Ver, Contratos.Crear, Contratos.Editar,
+            Prestamos.Ver, Prestamos.Crear, Prestamos.Editar, Prestamos.Abonos, Prestamos.Eliminar,
+            Contratos.Ver, Contratos.Crear, Contratos.Editar, Contratos.Eliminar,
             Propiedades.Ver, Propiedades.Crear, Propiedades.Editar, Propiedades.Eliminar,
             TiposPropiedad.Ver, TiposPropiedad.Crear, TiposPropiedad.Editar, TiposPropiedad.Eliminar,
-            Pagos.Ver, Pagos.Crear,
+            Pagos.Ver, Pagos.Crear, Pagos.Eliminar,
+            MetodosPago.Ver, MetodosPago.Crear, MetodosPago.Editar, MetodosPago.Eliminar,
             Usuarios.Ver, Usuarios.Crear, Usuarios.Editar, Usuarios.GestionarRoles,
             Roles.Ver, Roles.Crear, Roles.Editar, Roles.Eliminar, Roles.AsignarPermisos,
             ReportesVer
@@ -106,8 +119,9 @@ namespace FinanzasManager.Application.Common
             Prestamos.Ver, Prestamos.Crear, Prestamos.Editar, Prestamos.Abonos,
             Contratos.Ver, Contratos.Crear, Contratos.Editar,
             Propiedades.Ver, Propiedades.Crear,
-            // El cobrador necesita ver el catalogo para elegir tipo al crear una propiedad.
+            // El cobrador necesita el catalogo para elegir metodo al registrar un pago.
             TiposPropiedad.Ver,
+            MetodosPago.Ver,
             Pagos.Ver, Pagos.Crear,
             ReportesVer
         };

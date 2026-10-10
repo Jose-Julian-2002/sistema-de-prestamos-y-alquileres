@@ -4,7 +4,8 @@ using System.Collections.Generic;
 namespace FinanzasManager.Domain.Entities
 {
     // Reparte un Pago entre los prestamos y contratos que cubre.
-    // PrestamoId y ContratoId son opcionales: un detalle aplica a uno, al otro, o a ambos.
+    // PrestamoId y ContratoId son excluyentes: un detalle aplica a un prestamo
+    // o a un contrato, nunca a los dos a la vez.
     public class PagoDetalle
     {
         public int Id { get; set; }

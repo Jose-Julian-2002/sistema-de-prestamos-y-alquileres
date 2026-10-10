@@ -17,5 +17,10 @@ namespace FinanzasManager.Domain.Entities
         {
             Nombre = nombre.Trim();
         }
+
+        public void Actualizar(string nombre)
+        {
+            Nombre = nombre.Trim();
+        }
     }
 }

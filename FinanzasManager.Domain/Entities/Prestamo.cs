@@ -8,10 +8,10 @@ namespace FinanzasManager.Domain.Entities
         public int Id { get; set; }
         public decimal MontoCapital { get; set; }
 
-        // Porcentaje de interes aplicado al capital
+        // Porcentaje de interes mensual
         public decimal Interes { get; set; }
 
-        // Importe de cada cuota, no la cantidad de cuotas
+        //cantidad de cuotas
         public decimal TotalCuotas { get; set; }
 
         public DateTime FechaInicio { get; set; }
@@ -32,6 +32,15 @@ namespace FinanzasManager.Domain.Entities
             TotalCuotas = totalCuotas;
             FechaInicio = fechaInicio;
             Estado = true;
+        }
+
+        public void Actualizar(int clienteId, decimal montoCapital, decimal interes, decimal totalCuotas, DateTime fechaInicio)
+        {
+            ClienteId = clienteId;
+            MontoCapital = montoCapital;
+            Interes = interes;
+            TotalCuotas = totalCuotas;
+            FechaInicio = fechaInicio;
         }
     }
 }
