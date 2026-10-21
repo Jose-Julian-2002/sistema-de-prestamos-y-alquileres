@@ -19,6 +19,7 @@ Respuesta `200`:
 
 ```json
 {
+  "id": 1,
   "token": "eyJhbGciOi...",
   "nombre": "Administrador",
   "rol": "Administrador",
@@ -28,6 +29,8 @@ Respuesta `200`:
 
 > `permisos` es la lista de permisos del rol. El frontend puede usarla para mostrar u
 > ocultar botones, pero el servidor vuelve a validar en cada endpoint.
+> `id` permite comparar con `PagoDto.usuarioId` para saber si el usuario registró el
+> pago; aun así, el backend revalida la regla de anulación.
 
 ## Formato de error
 

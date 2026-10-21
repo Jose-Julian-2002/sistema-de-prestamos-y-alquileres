@@ -11,7 +11,9 @@ namespace FinanzasManager.Application.Features.Autenticacion.Commands
 {
     public record IniciarSesionCommand(string Gmail, string Password) : IRequest<AuthResponseDto>;
 
-    public record AuthResponseDto(string Token, string Nombre, string Rol, IReadOnlyList<string> Permisos);
+    // Id incluido para que el frontend pueda comparar con PagoDto.UsuarioId y
+    // decidir si muestra "Anular pago". El backend revalida siempre.
+    public record AuthResponseDto(int Id, string Token, string Nombre, string Rol, IReadOnlyList<string> Permisos);
 
     public class IniciarSesionCommandHandler : IRequestHandler<IniciarSesionCommand, AuthResponseDto>
     {
@@ -56,7 +58,7 @@ namespace FinanzasManager.Application.Features.Autenticacion.Commands
             // 3. Generar el token con los claims del usuario y sus permisos.
             var token = _jwtTokenGenerator.GenerarToken(usuario.Id, usuario.Nombre, usuario.Rol.Nombre, permisos);
 
-            return new AuthResponseDto(token, usuario.Nombre, usuario.Rol.Nombre, permisos);
+            return new AuthResponseDto(usuario.Id, token, usuario.Nombre, usuario.Rol.Nombre, permisos);
         }
     }
 }

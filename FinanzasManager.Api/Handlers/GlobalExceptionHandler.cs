@@ -1,4 +1,5 @@
 using System.Net;
+using FinanzasManager.Application.Common;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,8 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             UnauthorizedAccessException =>
                 (HttpStatusCode.Unauthorized, "Credenciales incorrectas o usuario inactivo."),
+            AccesoDenegadoException =>
+                (HttpStatusCode.Forbidden, exception.Message),
             ArgumentException =>
                 (HttpStatusCode.BadRequest, exception.Message),
             InvalidOperationException =>
