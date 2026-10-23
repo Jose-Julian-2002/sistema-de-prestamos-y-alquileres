@@ -46,8 +46,7 @@ namespace FinanzasManager.Application.Features.Autenticacion.Commands
             // 2. Verificar la contrasena contra el hash BCrypt almacenado.
             //    Si el hash esta malformado, Verify devuelve false sin lanzar excepcion.
             if (usuario is null || !_passwordHasher.Verify(request.Password ?? string.Empty, usuario.Password))
-            {
-                throw new UnauthorizedAccessException("Credenciales incorrectas o usuario inactivo.");
+            {                throw new UnauthorizedAccessException("Credenciales incorrectas o usuario inactivo.");
             }
 
             var permisos = usuario.Rol.Permisos
